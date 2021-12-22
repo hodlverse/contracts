@@ -3,7 +3,7 @@ const { ethers, waffle } = require("hardhat");
 const { solidity } = waffle;
 use(solidity);
 
-const { advanceBlockTo } = require("./utilities");
+const { advanceBlockTo } = require("./utilities/time");
 
 describe("Farming", function () {
   before(async function () {
