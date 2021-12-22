@@ -3,7 +3,8 @@ const { ethers, waffle } = require("hardhat");
 const { solidity } = waffle;
 use(solidity);
 
-const { encodeParameters, latest, duration, increase } = require("./utilities");
+const { latest, increase, duration } = require("./utilities/time");
+const { encodeParameters } = require("./utilities");
 
 describe("Time", function () {
   before(async function () {
