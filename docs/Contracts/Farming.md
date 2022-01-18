@@ -28,7 +28,7 @@ event Withdraw(
 ```
 
 ### Emergency
-THe EmergencyWithdraw event is emitted when a user returns the Money token in their possesion for the HVLP token they submoitted, before the end of a farming cycle.
+THe EmergencyWithdraw event is emitted when a user returns the Money token in their possesion for the HVLP token they submitted, before the end of a farming cycle.
 ```solidity
 event EmergencyWithdraw(
     address indexed user,

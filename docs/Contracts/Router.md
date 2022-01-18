@@ -1,6 +1,6 @@
 # Router Smart Contract API
 
-Routers are stateless and are boun to change over time. We may change it if there is need for more functionality or a better smart contract pattern is discovered.
+Routers are stateless and are bound to change over time. We may change it if there is need for more functionality or a better smart contract pattern is discovered.
 
 ## Code
 The code to the Router.sol file can be found here.
