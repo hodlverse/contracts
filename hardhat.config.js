@@ -14,7 +14,7 @@ require("hardhat-typechain");
 require("hardhat-watcher");
 require("solidity-coverage");
 
-const {removeConsoleLog} = require("hardhat-preprocessor");
+const { removeConsoleLog } = require("hardhat-preprocessor");
 const accounts = [process.env.DEPLOYER_PRIVATE_KEY];
 
 module.exports = {
