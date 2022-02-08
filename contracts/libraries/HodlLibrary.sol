@@ -149,7 +149,12 @@ library HodlLibrary {
                 path[i - 1],
                 path[i]
             );
-            amounts[i - 1] = getAmountIn(factory, amounts[i], reserveIn, reserveOut);
+            amounts[i - 1] = getAmountIn(
+                factory,
+                amounts[i],
+                reserveIn,
+                reserveOut
+            );
         }
     }
 }

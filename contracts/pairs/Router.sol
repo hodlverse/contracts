@@ -23,7 +23,8 @@ contract Router is IRouter {
     }
 
     receive() external payable {
-        assert(msg.sender == WETH); // only accept ETH via fallback from the WETH contract
+        // only accept ETH via fallback from the WETH contract
+        assert(msg.sender == WETH);
     }
 
     function safeTransferETH(address to, uint256 value) internal {
@@ -633,7 +634,8 @@ contract Router is IRouter {
         uint256 reserveIn,
         uint256 reserveOut
     ) public view virtual override returns (uint256 amountOut) {
-        return HodlLibrary.getAmountOut(factory, amountIn, reserveIn, reserveOut);
+        return
+            HodlLibrary.getAmountOut(factory, amountIn, reserveIn, reserveOut);
     }
 
     function getAmountIn(
@@ -641,7 +643,8 @@ contract Router is IRouter {
         uint256 reserveIn,
         uint256 reserveOut
     ) public view virtual override returns (uint256 amountIn) {
-        return HodlLibrary.getAmountIn(factory, amountOut, reserveIn, reserveOut);
+        return
+            HodlLibrary.getAmountIn(factory, amountOut, reserveIn, reserveOut);
     }
 
     function getAmountsOut(uint256 amountIn, address[] memory path)

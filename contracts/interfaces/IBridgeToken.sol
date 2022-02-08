@@ -14,7 +14,7 @@ interface IBridgeToken {
     function mintTo(uint256 amount, address recipient) external returns (bool);
 
     /**
-    * @dev Burn `amount` tokens and decreasing the total supply.
-    */
+     * @dev Burn `amount` tokens and decreasing the total supply.
+     */
     function burn(uint256 amount) external returns (bool);
 }
