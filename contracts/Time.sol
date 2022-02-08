@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract Time {
     using SafeMath for uint256;
 
-    event NewOwner(address indexed newOwner);
-    event NewPendingOwner(address indexed newPendingOwner);
+    event NewAdmin(address indexed newAdmin);
+    event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
     event CancelTransaction(
         bytes32 indexed txHash,
@@ -38,14 +38,14 @@ contract Time {
     uint256 public constant MINIMUM_DELAY = 2 days;
     uint256 public constant MAXIMUM_DELAY = 30 days;
 
-    address public owner;
-    address public pendingOwner;
+    address public admin;
+    address public pendingAdmin;
     uint256 public delay;
-    bool public owner_initialized;
+    bool public admin_initialized;
 
     mapping(bytes32 => bool) public queuedTransactions;
 
-    constructor(address owner_, uint256 delay_) public {
+    constructor(address admin_, uint256 delay_) public {
         require(
             delay_ >= MINIMUM_DELAY,
             "Time::constructor: Delay must exceed minimum delay."
@@ -55,7 +55,7 @@ contract Time {
             "Time::constructor: Delay must not exceed maximum delay."
         );
 
-        owner = owner_;
+        admin = admin_;
         delay = delay_;
     }
 
@@ -79,34 +79,34 @@ contract Time {
         emit NewDelay(delay);
     }
 
-    function acceptOwner() public {
+    function acceptAdmin() public {
         require(
-            msg.sender == pendingOwner,
-            "Time::acceptOwner: Call must come from pendingOwner."
+            msg.sender == pendingAdmin,
+            "Time::acceptAdmin: Call must come from pendingAdmin."
         );
-        owner = msg.sender;
-        pendingOwner = address(0);
+        admin = msg.sender;
+        pendingAdmin = address(0);
 
-        emit NewOwner(owner);
+        emit NewAdmin(admin);
     }
 
-    function setPendingOwner(address pendingOwner_) public {
-        // allows one time setting of owner for deployment purposes
-        if (owner_initialized) {
+    function setPendingAdmin(address pendingAdmin_) public {
+        // allows one time setting of admin for deployment purposes
+        if (admin_initialized) {
             require(
                 msg.sender == address(this),
-                "Time::setPendingOwner: Call must come from Time."
+                "Time::setPendingAdmin: Call must come from Time."
             );
         } else {
             require(
-                msg.sender == owner,
-                "Time::setPendingOwner: First call must come from owner."
+                msg.sender == admin,
+                "Time::setPendingAdmin: First call must come from admin."
             );
-            owner_initialized = true;
+            admin_initialized = true;
         }
-        pendingOwner = pendingOwner_;
+        pendingAdmin = pendingAdmin_;
 
-        emit NewPendingOwner(pendingOwner);
+        emit NewPendingAdmin(pendingAdmin);
     }
 
     function queueTransaction(
@@ -117,8 +117,8 @@ contract Time {
         uint256 eta
     ) public returns (bytes32) {
         require(
-            msg.sender == owner,
-            "Time::queueTransaction: Call must come from owner."
+            msg.sender == admin,
+            "Time::queueTransaction: Call must come from admin."
         );
         require(
             eta >= getBlockTimestamp().add(delay),
@@ -142,8 +142,8 @@ contract Time {
         uint256 eta
     ) public {
         require(
-            msg.sender == owner,
-            "Time::cancelTransaction: Call must come from owner."
+            msg.sender == admin,
+            "Time::cancelTransaction: Call must come from admin."
         );
 
         bytes32 txHash = keccak256(
@@ -162,8 +162,8 @@ contract Time {
         uint256 eta
     ) public payable returns (bytes memory) {
         require(
-            msg.sender == owner,
-            "Time::executeTransaction: Call must come from owner."
+            msg.sender == admin,
+            "Time::executeTransaction: Call must come from admin."
         );
 
         bytes32 txHash = keccak256(
