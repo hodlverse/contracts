@@ -8,7 +8,10 @@ contract OwnableData {
 }
 
 contract Ownable is OwnableData {
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     constructor() internal {
         owner = msg.sender;
@@ -21,7 +24,10 @@ contract Ownable is OwnableData {
         bool renounce
     ) public onlyOwner {
         if (direct) {
-            require(newOwner != address(0) || renounce, "Ownable: zero address");
+            require(
+                newOwner != address(0) || renounce,
+                "Ownable: zero address"
+            );
 
             emit OwnershipTransferred(owner, newOwner);
             owner = newOwner;
@@ -33,7 +39,10 @@ contract Ownable is OwnableData {
     function claimOwnership() public {
         address _pendingOwner = pendingOwner;
 
-        require(msg.sender == _pendingOwner, "Ownable: caller != pending owner");
+        require(
+            msg.sender == _pendingOwner,
+            "Ownable: caller != pending owner"
+        );
 
         emit OwnershipTransferred(owner, _pendingOwner);
         owner = _pendingOwner;

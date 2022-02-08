@@ -159,7 +159,9 @@ contract Core is HVLPToken {
         uint256 amount1 = balance1.sub(_reserve1);
 
         bool feeOn = _mintFee(_reserve0, _reserve1);
-        uint256 _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
+        // gas savings, must be defined here since totalSupply can update in _mintFee
+        uint256 _totalSupply = totalSupply;
+
         if (_totalSupply == 0) {
             address migrator = IFactory(factory).migrator();
             if (msg.sender == migrator) {
@@ -203,9 +205,13 @@ contract Core is HVLPToken {
         uint256 liquidity = balanceOf[address(this)];
 
         bool feeOn = _mintFee(_reserve0, _reserve1);
-        uint256 _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
-        amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
-        amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
+        // gas savings, must be defined here since totalSupply can update in _mintFee
+        uint256 _totalSupply = totalSupply;
+        // using balances ensures pro-rata distribution
+        amount0 = liquidity.mul(balance0) / _totalSupply;
+
+        // using balances ensures pro-rata distribution
+        amount1 = liquidity.mul(balance1) / _totalSupply;
         require(
             amount0 > 0 && amount1 > 0,
             "HODL: INSUFFICIENT_LIQUIDITY_BURNED"
