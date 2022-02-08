@@ -98,15 +98,15 @@ contract MoneyTokenBridge is Ownable {
         );
 
         totalSupply = sub96(
-            uint96(totalSupply),
+            totalSupply,
             amount,
-            "Money::burn: burn amount exceeds balance"
+            "Money::burn: amount exceeds total supply"
         );
-
-        _moveDelegates(delegates[msg.sender], address(0), amount);
 
         emit Transfer(msg.sender, address(0), amount);
         emit Burn(msg.sender, amount);
+
+        _moveDelegates(delegates[msg.sender], address(0), amount);
         return true;
     }
 
@@ -171,8 +171,8 @@ contract MoneyTokenBridge is Ownable {
         returns (bool)
     {
         uint96 amount;
-        if (rawAmount == uint256(-1) || rawAmount >= 2**96) {
-            amount = uint96(-1);
+        if (rawAmount >= type(uint96).max) {
+            amount = type(uint96).max;
         } else {
             amount = uint96(rawAmount);
         }
@@ -225,7 +225,7 @@ contract MoneyTokenBridge is Ownable {
             "Money::approve: amount exceeds 96 bits"
         );
 
-        if (spender != src && spenderAllowance != uint96(-1)) {
+        if (spender != src && spenderAllowance != type(uint96).max) {
             uint96 newAllowance = sub96(
                 spenderAllowance,
                 amount,
@@ -288,7 +288,10 @@ contract MoneyTokenBridge is Ownable {
             nonce == nonces[signatory]++,
             "Money::delegateBySig: invalid nonce"
         );
-        require(now <= expiry, "Money::delegateBySig: signature expired");
+        require(
+            block.timestamp <= expiry,
+            "Money::delegateBySig: signature expired"
+        );
         return _delegate(signatory, delegatee);
     }
 
@@ -465,7 +468,7 @@ contract MoneyTokenBridge is Ownable {
         pure
         returns (uint96)
     {
-        require(n < 2**96, errorMessage);
+        require(n < type(uint256).max, errorMessage);
         return uint96(n);
     }
 
