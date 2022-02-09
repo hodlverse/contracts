@@ -47,6 +47,7 @@ contract FarmFactory is Ownable {
         uint256 _reserveDistributionSchedule
     );
     event SetReserveAddress(address _reserve);
+    event RewardsAccumulated();
 
     modifier onlyFarm() {
         require(farmAddresses[msg.sender] != address(0), "NOT_FARM");
@@ -197,6 +198,8 @@ contract FarmFactory is Ownable {
         globalRoundId = rewards.length.sub(1);
 
         lastReserveDistributionTimestamp = block.timestamp;
+
+        emit RewardsAccumulated();
     }
 
     // Update reward variables of the given pool to be up-to-date.
