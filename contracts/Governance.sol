@@ -16,9 +16,6 @@ contract HODLGovernor is
     GovernorVotesCompUpgradeable,
     GovernorTimelockCompoundUpgradeable
 {
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
-
     function initialize(
         ERC20VotesCompUpgradeable _token,
         ICompoundTimelockUpgradeable _timelock

@@ -89,7 +89,7 @@ contract MoneyToken is Initializable, OwnableUpgradeable {
         __MoneyToken_init_unchained();
     }
 
-    function __MoneyToken_init_unchained() internal initializer {
+    function __MoneyToken_init_unchained() internal {
         balances[_msgSender()] = totalSupply;
         emit Transfer(address(0), _msgSender(), totalSupply);
     }
