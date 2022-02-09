@@ -42,6 +42,14 @@ contract IDO is Ownable, Pausable {
         uint256 amount
     );
 
+    event UpdateSaleStartTime(uint256 newSaleStartTime);
+    event UpdateSaleEndTime(uint256 newSaleEndTime);
+    event UpdateUnlockTime(uint256 newUnlockTime);
+    event UpdateWithdrawer(address newWithdrawer);
+    event UpdateDepositMin(uint256 newDepositMin);
+    event UpdateDepositMax(uint256 newDepositMax);
+    event Withdraw(uint256 usdtBalance);
+
     constructor(
         uint256 _saleStartTime,
         uint256 _saleEndTime,
@@ -80,6 +88,8 @@ contract IDO is Ownable, Pausable {
             "MoneyIDO: Invalid sale start time."
         );
         saleStartTime = newSaleStartTime;
+
+        emit UpdateSaleStartTime(newSaleStartTime);
     }
 
     function setSaleEndTime(uint256 newSaleEndTime) public onlyOwner {
@@ -88,6 +98,8 @@ contract IDO is Ownable, Pausable {
             "MoneyIDO: Invalid sale end time"
         );
         saleEndTime = newSaleEndTime;
+
+        emit UpdateSaleEndTime(newSaleEndTime);
     }
 
     function setWithdrawer(address newWithdrawer) public onlyOwner {
@@ -96,21 +108,29 @@ contract IDO is Ownable, Pausable {
             "MoneyIDO: Invalid withdrawer address."
         );
         withdrawer = newWithdrawer;
+
+        emit UpdateWithdrawer(newWithdrawer);
     }
 
     function setUnlockTime(uint256 newUnlockTime) public onlyOwner {
         require(newUnlockTime > saleEndTime, "MoneyIDO: Invalid unlock time");
         unlockTime = newUnlockTime;
+
+        emit UpdateUnlockTime(newUnlockTime);
     }
 
     function setDepositMin(uint256 newDepositMin) public onlyOwner {
         require(newDepositMin != uint256(-1), "MoneyIDO: Invalid min deposit.");
         depositMin = newDepositMin;
+
+        emit UpdateDepositMin(newDepositMin);
     }
 
     function setDepositMax(uint256 newDepositMax) public onlyOwner {
         require(newDepositMax != 0, "MoneyIDO: Invalid max deposit");
         depositMax = newDepositMax;
+
+        emit UpdateDepositMax(newDepositMax);
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -196,6 +216,8 @@ contract IDO is Ownable, Pausable {
 
         uint256 usdtBalance = USDT.balanceOf(address(this));
         USDT.safeTransfer(withdrawer, usdtBalance);
+
+        emit Withdraw(usdtBalance);
     }
 
     function withdrawRest() public whenNotPaused {
@@ -213,6 +235,8 @@ contract IDO is Ownable, Pausable {
             soldMoneyAmount
         );
         MONEY.safeTransfer(withdrawer, unsoldMoneyBalance);
+
+        emit Withdraw(unsoldMoneyBalance);
     }
 
     // In case the contract is paused due to some reason, the users and withdrawer will still

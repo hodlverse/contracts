@@ -54,6 +54,7 @@ contract Farm is Ownable, ReentrancyGuard {
         uint256 amount,
         uint256 rewards
     );
+    event PoolUpdated();
 
     constructor(
         address _money,
@@ -188,6 +189,8 @@ contract Farm is Ownable, ReentrancyGuard {
 
             cumulativeMoneyPerShare.push(share);
         }
+
+        emit PoolUpdated();
     }
 
     function pendingMoney(address _user) public view returns (uint256 pending) {
