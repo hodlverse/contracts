@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-import "./utils/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.4;
 
-contract MoneyToken is Ownable {
+contract MoneyToken is Initializable, OwnableUpgradeable {
+    using SafeMathUpgradeable for uint256;
     /// @notice EIP-20 token name for this token
     string public constant name = "MONEY";
 
@@ -15,7 +17,7 @@ contract MoneyToken is Ownable {
     uint8 public constant decimals = 18;
 
     /// @notice Total number of tokens in circulation
-    uint256 public constant totalSupply = 5000000000 ether; // 5 billion MONEY
+    uint96 public totalSupply = 5000000000 ether; // 5 billion MONEY
 
     /// @dev Allowance amounts on behalf of others
     mapping(address => mapping(address => uint96)) internal allowances;
@@ -79,13 +81,17 @@ contract MoneyToken is Ownable {
     );
 
     /**
-     * @notice Construct a new Money token
-     * @param account The initial account to grant all the tokens
+     * @notice Construct a new MONEY token
      */
-    constructor(address account) public {
-        balances[account] = uint96(totalSupply);
-        transferOwnership(account, true, false);
-        emit Transfer(address(0), account, totalSupply);
+
+    function __MoneyToken_init() external initializer {
+        __Ownable_init();
+        __MoneyToken_init_unchained();
+    }
+
+    function __MoneyToken_init_unchained() internal {
+        balances[_msgSender()] = totalSupply;
+        emit Transfer(address(0), _msgSender(), totalSupply);
     }
 
     /**
@@ -103,6 +109,13 @@ contract MoneyToken is Ownable {
             amount,
             "Money::burn: burn amount exceeds balance"
         );
+
+        totalSupply = sub96(
+            totalSupply,
+            amount,
+            "Money::burn: amount exceeds total supply"
+        );
+
         emit Transfer(msg.sender, address(0), amount);
         emit Burn(msg.sender, amount);
 
@@ -137,8 +150,8 @@ contract MoneyToken is Ownable {
         returns (bool)
     {
         uint96 amount;
-        if (rawAmount == uint256(-1) || rawAmount >= 2**96) {
-            amount = uint96(-1);
+        if (rawAmount >= type(uint96).max) {
+            amount = type(uint96).max;
         } else {
             amount = uint96(rawAmount);
         }
@@ -191,7 +204,7 @@ contract MoneyToken is Ownable {
             "Money::approve: amount exceeds 96 bits"
         );
 
-        if (spender != src && spenderAllowance != uint96(-1)) {
+        if (spender != src && spenderAllowance != type(uint96).max) {
             uint96 newAllowance = sub96(
                 spenderAllowance,
                 amount,
@@ -254,7 +267,10 @@ contract MoneyToken is Ownable {
             nonce == nonces[signatory]++,
             "Money::delegateBySig: invalid nonce"
         );
-        require(now <= expiry, "Money::delegateBySig: signature expired");
+        require(
+            block.timestamp <= expiry,
+            "Money::delegateBySig: signature expired"
+        );
         return _delegate(signatory, delegatee);
     }
 
@@ -431,7 +447,7 @@ contract MoneyToken is Ownable {
         pure
         returns (uint96)
     {
-        require(n < 2**96, errorMessage);
+        require(n < type(uint256).max, errorMessage);
         return uint96(n);
     }
 
@@ -454,11 +470,13 @@ contract MoneyToken is Ownable {
         return a - b;
     }
 
-    function getChainId() internal pure returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
         }
         return chainId;
     }
+
+    uint256[49] private __gap;
 }

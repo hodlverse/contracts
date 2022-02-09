@@ -13,11 +13,13 @@ contract BasicBridge is Ownable {
         address indexed toAddress,
         uint256 amount
     );
+    event UpdatedSwapFee(uint256 newFee);
 
     /**
      * @dev Returns set minimum swap fee from ERC20 to BEP20
      */
     function setSwapFee(uint256 fee) external onlyOwner {
         swapFee = fee;
+        emit UpdatedSwapFee(fee);
     }
 }

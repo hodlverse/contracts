@@ -54,6 +54,7 @@ contract Farm is Ownable, ReentrancyGuard {
         uint256 amount,
         uint256 rewards
     );
+    event PoolUpdated();
 
     constructor(
         address _money,
@@ -128,7 +129,9 @@ contract Farm is Ownable, ReentrancyGuard {
         if (
             depositForRound != deposits.length.sub(1) &&
             depositForRound != deposits.length
-        ) depositForRound = deposits.length;
+        ) {
+            depositForRound = deposits.length;
+        }
     }
 
     function getMoneyPerShare(uint256 _round) external view returns (uint256) {
@@ -155,7 +158,9 @@ contract Farm is Ownable, ReentrancyGuard {
             lastReserveDistributionTimestamp.add(
                 getReserveDistributionSchedule()
             ) <= block.timestamp
-        ) updatePool();
+        ) {
+            updatePool();
+        }
     }
 
     function updatePool() public {
@@ -184,6 +189,8 @@ contract Farm is Ownable, ReentrancyGuard {
 
             cumulativeMoneyPerShare.push(share);
         }
+
+        emit PoolUpdated();
     }
 
     function pendingMoney(address _user) public view returns (uint256 pending) {
