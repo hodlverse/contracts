@@ -3,6 +3,8 @@
 pragma solidity =0.6.12;
 
 import "../interfaces/IFactory.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+
 import "./Core.sol";
 
 contract Factory is IFactory {
@@ -16,6 +18,8 @@ contract Factory is IFactory {
     uint256 public override buybackShare = 15;
     //1000 MONEY Tokens
     uint256 public override discountEligibilityBalance = 1000 ether;
+    uint256 public goldenTicketID;
+    IERC1155 public goldenTicketNFT;
 
     mapping(address => mapping(address => address)) public override getPair;
     address[] public override allPairs;
@@ -40,11 +44,17 @@ contract Factory is IFactory {
         _;
     }
 
-    constructor(address _money) public {
+    constructor(
+        address _money,
+        address _goldenTicket,
+        uint256 _goldenTicketID
+    ) public {
         require(_money != address(0), "HODL:constructor:: ZERO_ADDRESS_MONEY");
 
         owner = msg.sender;
         money = _money;
+        goldenTicketNFT = IERC1155(_goldenTicket);
+        goldenTicketID = _goldenTicketID;
     }
 
     function allPairsLength() external view override returns (uint256) {
@@ -127,13 +137,22 @@ contract Factory is IFactory {
         emit UpdateDiscountEligibilityBalance(_discountEligibilityBalance);
     }
 
+    function isGoldenTicketHolder(address _user) internal returns (bool) {
+        if (goldenTicketNFT.balanceOf(_user, goldenTicketID) > 0) return true;
+        return false;
+    }
+
     function getSwapFee(address _user)
         external
         view
         override
         returns (uint256, uint256)
     {
-        if (IERC20(money).balanceOf(_user) > discountEligibilityBalance) {
+        if (isGoldenTicketHolder(_user)) {
+            return (0, 0);
+        } else if (
+            IERC20(money).balanceOf(_user) > discountEligibilityBalance
+        ) {
             return (swapFee / 2, buybackShare / 2);
         } else {
             return (swapFee, buybackShare);
