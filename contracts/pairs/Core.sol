@@ -286,13 +286,15 @@ contract Core is HVLPToken {
             );
 
             //transfer fee to buyback
-            uint256 fee0 = amount0In.mul(buybackShare).div(1000);
-            uint256 fee1 = amount1In.mul(buybackShare).div(1000);
+            if (buybackShare > 0) {
+                uint256 fee0 = amount0In.mul(buybackShare).div(1000);
+                uint256 fee1 = amount1In.mul(buybackShare).div(1000);
 
-            if (fee0 > 0)
-                _safeTransfer(token0, IFactory(factory).buyback(), fee0);
-            if (fee1 > 0)
-                _safeTransfer(token1, IFactory(factory).buyback(), fee1);
+                if (fee0 > 0)
+                    _safeTransfer(token0, IFactory(factory).buyback(), fee0);
+                if (fee1 > 0)
+                    _safeTransfer(token1, IFactory(factory).buyback(), fee1);
+            }
         }
 
         balance0 = IERC20(token0).balanceOf(address(this));
