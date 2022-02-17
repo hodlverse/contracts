@@ -36,11 +36,16 @@ contract FarmFactory is Ownable {
     uint256 public lastReserveDistributionTimestamp;
     uint256 public depositPeriod = 24 hours;
 
-    event NewPool(IERC20 _lpToken, uint256 _allocPoint, uint16 _depositFeeBP);
+    event NewPool(
+        address indexed farm,
+        IERC20 lpToken,
+        uint256 allocPoint,
+        uint16 depositFeeBP
+    );
     event UpdatePool(
-        uint256 _farmId,
-        uint256 _allocPoint,
-        uint16 _depositFeeBP
+        address indexed farm,
+        uint256 allocPoint,
+        uint16 depositFeeBP
     );
     event SetFeeAddress(address indexed user, address indexed newAddress);
     event UpdatedReserveDistributionSchedule(
@@ -120,18 +125,21 @@ contract FarmFactory is Ownable {
         }
 
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
+        farmId = farmId + 1;
+
         Farm farm = new Farm(
             money,
             _allocPoint,
             _lpToken,
             _depositFeeBP,
-            globalRoundId
+            globalRoundId,
+            farmId
         );
 
-        farms[farmId + 1] = address(farm);
+        farms[farmId] = address(farm);
         farmAddresses[address(farm)] = address(_lpToken);
 
-        emit NewPool(_lpToken, _allocPoint, _depositFeeBP);
+        emit NewPool(address(farm), _lpToken, _allocPoint, _depositFeeBP);
     }
 
     // Update the given pool's MONEY allocation point and deposit fee. Can only be called by the owner.
@@ -155,7 +163,7 @@ contract FarmFactory is Ownable {
         );
         farm.set(_allocPoint, _depositFeeBP);
 
-        emit UpdatePool(_farmId, _allocPoint, _depositFeeBP);
+        emit UpdatePool(farms[_farmId], _allocPoint, _depositFeeBP);
     }
 
     function getCurrentRoundId(uint256 _farmId)

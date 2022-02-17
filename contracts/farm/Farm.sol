@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../interfaces/IReserve.sol";
 import "../interfaces/IFarmFactory.sol";
 
-contract Farm is Ownable, ReentrancyGuard {
+contract Farm is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -25,6 +25,7 @@ contract Farm is Ownable, ReentrancyGuard {
     uint256 public poolStartTime; // timestamp when the owner add a farm
     uint256 public globalRoundId;
     uint256 public availableRewards;
+    uint256 public farmId;
 
     //only after this time, rewards will be fetched and ditributed to the users from last date
     uint256 public lastReserveDistributionTimestamp;
@@ -61,7 +62,8 @@ contract Farm is Ownable, ReentrancyGuard {
         uint256 _allocPoint,
         IERC20 _lpToken,
         uint16 _depositFeeBP,
-        uint256 _globalRoundId
+        uint256 _globalRoundId,
+        uint256 _farmId
     ) public {
         require(
             _money != address(0),
@@ -76,6 +78,7 @@ contract Farm is Ownable, ReentrancyGuard {
         lastReserveDistributionTimestamp = depositPeriod.add(block.timestamp);
         poolStartTime = block.timestamp;
         globalRoundId = _globalRoundId;
+        farmId = _farmId;
     }
 
     modifier onlyFactory() {

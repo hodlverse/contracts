@@ -137,7 +137,7 @@ contract Factory is IFactory {
         emit UpdateDiscountEligibilityBalance(_discountEligibilityBalance);
     }
 
-    function isGoldenTicketHolder(address _user) internal returns (bool) {
+    function isGoldenTicketHolder(address _user) internal view returns (bool) {
         if (goldenTicketNFT.balanceOf(_user, goldenTicketID) > 0) return true;
         return false;
     }
