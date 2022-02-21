@@ -197,6 +197,8 @@ contract Core is HVLPToken {
         lock
         returns (uint256 amount0, uint256 amount1)
     {
+        require(to != address(0), "HODL: ZERO_ADDRESS");
+
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings

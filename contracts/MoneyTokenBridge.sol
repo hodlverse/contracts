@@ -244,7 +244,7 @@ contract MoneyTokenBridge is Ownable {
      * @notice Delegate votes from `msg.sender` to `delegatee`
      * @param delegatee The address to delegate votes to
      */
-    function delegate(address delegatee) public {
+    function delegate(address delegatee) external {
         return _delegate(msg.sender, delegatee);
     }
 
@@ -264,7 +264,7 @@ contract MoneyTokenBridge is Ownable {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
+    ) external {
         bytes32 domainSeparator = keccak256(
             abi.encode(
                 DOMAIN_TYPEHASH,
@@ -314,7 +314,7 @@ contract MoneyTokenBridge is Ownable {
      * @return The number of votes the account had as of the given block
      */
     function getPriorVotes(address account, uint256 blockNumber)
-        public
+        external
         view
         returns (uint96)
     {

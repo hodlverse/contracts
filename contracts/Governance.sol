@@ -19,7 +19,7 @@ contract HODLGovernor is
     function initialize(
         ERC20VotesCompUpgradeable _token,
         ICompoundTimelockUpgradeable _timelock
-    ) public initializer {
+    ) external initializer {
         __Governor_init("MyGovernor");
         __GovernorSettings_init(
             1, /* 1 block */
@@ -32,7 +32,7 @@ contract HODLGovernor is
     }
 
     function quorum(uint256 blockNumber)
-        public
+        external
         pure
         override
         returns (uint256)
@@ -43,7 +43,7 @@ contract HODLGovernor is
     // The following functions are overrides required by Solidity.
 
     function votingDelay()
-        public
+        external
         view
         override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -52,7 +52,7 @@ contract HODLGovernor is
     }
 
     function votingPeriod()
-        public
+        external
         view
         override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -61,7 +61,7 @@ contract HODLGovernor is
     }
 
     function getVotes(address account, uint256 blockNumber)
-        public
+        external
         view
         override(IGovernorUpgradeable, GovernorVotesCompUpgradeable)
         returns (uint256)
@@ -70,7 +70,7 @@ contract HODLGovernor is
     }
 
     function state(uint256 proposalId)
-        public
+        external
         view
         override(
             GovernorUpgradeable,
@@ -88,7 +88,7 @@ contract HODLGovernor is
         bytes[] memory calldatas,
         string memory description
     )
-        public
+        external
         override(
             GovernorUpgradeable,
             GovernorCompatibilityBravoUpgradeable,
@@ -100,7 +100,7 @@ contract HODLGovernor is
     }
 
     function proposalThreshold()
-        public
+        external
         view
         override(GovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -144,7 +144,7 @@ contract HODLGovernor is
     }
 
     function supportsInterface(bytes4 interfaceId)
-        public
+        external
         view
         override(
             GovernorUpgradeable,

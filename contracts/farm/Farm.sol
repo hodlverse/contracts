@@ -87,7 +87,10 @@ contract Farm is ReentrancyGuard {
     }
 
     // Update the given pool's MONEY allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _allocPoint, uint16 _depositFeeBP) public onlyFactory {
+    function set(uint256 _allocPoint, uint16 _depositFeeBP)
+        external
+        onlyFactory
+    {
         allocPoint = _allocPoint;
         depositFeeBP = _depositFeeBP;
     }
@@ -222,7 +225,7 @@ contract Farm is ReentrancyGuard {
     }
 
     // Deposit LP tokens to MoneyFarm for MONEY allocation.
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) external {
         depositFor(msg.sender, _amount);
     }
 
@@ -258,7 +261,7 @@ contract Farm is ReentrancyGuard {
     }
 
     // Withdraw LP tokens from MoneyFarm.
-    function withdraw(uint256 _amount) public {
+    function withdraw(uint256 _amount) external {
         withdrawFor(msg.sender, _amount);
     }
 

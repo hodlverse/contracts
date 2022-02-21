@@ -28,7 +28,7 @@ contract Migrator {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
+    ) external {
         ICore pair = ICore(pairForOldRouter(tokenA, tokenB));
         pair.permit(msg.sender, address(this), liquidity, deadline, v, r, s);
 

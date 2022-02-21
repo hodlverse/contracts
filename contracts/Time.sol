@@ -61,7 +61,7 @@ contract Time {
 
     receive() external payable {}
 
-    function setDelay(uint256 delay_) public {
+    function setDelay(uint256 delay_) external {
         require(
             msg.sender == address(this),
             "Time::setDelay: Call must come from Time."
@@ -79,7 +79,7 @@ contract Time {
         emit NewDelay(delay);
     }
 
-    function acceptAdmin() public {
+    function acceptAdmin() external {
         require(
             msg.sender == pendingAdmin,
             "Time::acceptAdmin: Call must come from pendingAdmin."
@@ -90,7 +90,7 @@ contract Time {
         emit NewAdmin(admin);
     }
 
-    function setPendingAdmin(address pendingAdmin_) public {
+    function setPendingAdmin(address pendingAdmin_) external {
         // allows one time setting of admin for deployment purposes
         if (admin_initialized) {
             require(
@@ -115,7 +115,7 @@ contract Time {
         string memory signature,
         bytes memory data,
         uint256 eta
-    ) public returns (bytes32) {
+    ) external returns (bytes32) {
         require(
             msg.sender == admin,
             "Time::queueTransaction: Call must come from admin."
@@ -140,7 +140,7 @@ contract Time {
         string memory signature,
         bytes memory data,
         uint256 eta
-    ) public {
+    ) external {
         require(
             msg.sender == admin,
             "Time::cancelTransaction: Call must come from admin."
@@ -160,7 +160,7 @@ contract Time {
         string memory signature,
         bytes memory data,
         uint256 eta
-    ) public payable returns (bytes memory) {
+    ) external payable returns (bytes memory) {
         require(
             msg.sender == admin,
             "Time::executeTransaction: Call must come from admin."

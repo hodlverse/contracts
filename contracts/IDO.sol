@@ -82,7 +82,7 @@ contract IDO is Ownable, Pausable {
         MONEY = IERC20(moneyAddr);
     }
 
-    function setSaleStartTime(uint256 newSaleStartTime) public onlyOwner {
+    function setSaleStartTime(uint256 newSaleStartTime) external onlyOwner {
         require(
             newSaleStartTime < saleEndTime,
             "MoneyIDO: Invalid sale start time."
@@ -92,7 +92,7 @@ contract IDO is Ownable, Pausable {
         emit UpdateSaleStartTime(newSaleStartTime);
     }
 
-    function setSaleEndTime(uint256 newSaleEndTime) public onlyOwner {
+    function setSaleEndTime(uint256 newSaleEndTime) external onlyOwner {
         require(
             newSaleEndTime > saleStartTime && unlockTime > newSaleEndTime,
             "MoneyIDO: Invalid sale end time"
@@ -102,7 +102,7 @@ contract IDO is Ownable, Pausable {
         emit UpdateSaleEndTime(newSaleEndTime);
     }
 
-    function setWithdrawer(address newWithdrawer) public onlyOwner {
+    function setWithdrawer(address newWithdrawer) external onlyOwner {
         require(
             newWithdrawer != address(0),
             "MoneyIDO: Invalid withdrawer address."
@@ -112,21 +112,21 @@ contract IDO is Ownable, Pausable {
         emit UpdateWithdrawer(newWithdrawer);
     }
 
-    function setUnlockTime(uint256 newUnlockTime) public onlyOwner {
+    function setUnlockTime(uint256 newUnlockTime) external onlyOwner {
         require(newUnlockTime > saleEndTime, "MoneyIDO: Invalid unlock time");
         unlockTime = newUnlockTime;
 
         emit UpdateUnlockTime(newUnlockTime);
     }
 
-    function setDepositMin(uint256 newDepositMin) public onlyOwner {
+    function setDepositMin(uint256 newDepositMin) external onlyOwner {
         require(newDepositMin != uint256(-1), "MoneyIDO: Invalid min deposit.");
         depositMin = newDepositMin;
 
         emit UpdateDepositMin(newDepositMin);
     }
 
-    function setDepositMax(uint256 newDepositMax) public onlyOwner {
+    function setDepositMax(uint256 newDepositMax) external onlyOwner {
         require(newDepositMax != 0, "MoneyIDO: Invalid max deposit");
         depositMax = newDepositMax;
 
@@ -153,7 +153,7 @@ contract IDO is Ownable, Pausable {
             .div(EXCHANGE_RATE_PRECISION);
     }
 
-    function deposit(uint256 amount) public whenNotPaused {
+    function deposit(uint256 amount) external whenNotPaused {
         require(
             block.timestamp >= saleStartTime,
             "MoneyIDO: IDO is not started yet."
@@ -188,7 +188,7 @@ contract IDO is Ownable, Pausable {
         emit Deposited(msg.sender, amount);
     }
 
-    function claim() public whenNotPaused {
+    function claim() external whenNotPaused {
         require(
             block.timestamp >= unlockTime,
             "MoneyIDO: IDO is not unlocked yet."
@@ -204,7 +204,7 @@ contract IDO is Ownable, Pausable {
         emit Claimed(msg.sender, moneyAmount);
     }
 
-    function withdraw() public whenNotPaused {
+    function withdraw() external whenNotPaused {
         require(
             msg.sender == withdrawer,
             "MoneyIDO: You can't withdraw funds."
@@ -220,7 +220,7 @@ contract IDO is Ownable, Pausable {
         emit Withdraw(usdtBalance);
     }
 
-    function withdrawRest() public whenNotPaused {
+    function withdrawRest() external whenNotPaused {
         require(
             msg.sender == withdrawer,
             "MoneyIDO: You can't withdraw funds."

@@ -107,7 +107,7 @@ contract FarmFactory is Ownable {
         uint256 _allocPoint,
         IERC20 _lpToken,
         uint16 _depositFeeBP
-    ) public onlyOwner {
+    ) external onlyOwner {
         require(
             _depositFeeBP <= 10000,
             "FarmFactory:add:: INVALID_FEE_BASIS_POINTS"
@@ -147,7 +147,7 @@ contract FarmFactory is Ownable {
         uint256 _farmId,
         uint256 _allocPoint,
         uint16 _depositFeeBP
-    ) public onlyOwner {
+    ) external onlyOwner {
         require(
             _depositFeeBP <= 10000,
             "FarmFactory:set:: INVALID_FEE_BASIS_POINTS"
@@ -167,7 +167,7 @@ contract FarmFactory is Ownable {
     }
 
     function getCurrentRoundId(uint256 _farmId)
-        public
+        external
         view
         returns (uint256 depositForRound)
     {
@@ -175,7 +175,7 @@ contract FarmFactory is Ownable {
     }
 
     function pendingMoney(uint256 _farmId, address _user)
-        public
+        external
         view
         returns (uint256 pending)
     {
@@ -183,16 +183,16 @@ contract FarmFactory is Ownable {
     }
 
     // Deposit LP tokens to MoneyFarm for MONEY allocation.
-    function deposit(uint256 _farmId, uint256 _amount) public {
+    function deposit(uint256 _farmId, uint256 _amount) external {
         Farm(farms[_farmId]).depositFor(msg.sender, _amount);
     }
 
     // Withdraw LP tokens from MoneyFarm.
-    function withdraw(uint256 _farmId, uint256 _amount) public {
+    function withdraw(uint256 _farmId, uint256 _amount) external {
         Farm(farms[_farmId]).withdrawFor(msg.sender, _amount);
     }
 
-    function pullRewards() public returns (uint256 rewardAccumulated) {
+    function pullRewards() external returns (uint256 rewardAccumulated) {
         require(
             lastReserveDistributionTimestamp.add(reserveDistributionSchedule) <=
                 block.timestamp,
@@ -231,12 +231,12 @@ contract FarmFactory is Ownable {
         );
     }
 
-    function setFeeAddress(address _feeAddress) public onlyOwner {
+    function setFeeAddress(address _feeAddress) external onlyOwner {
         feeAddress = _feeAddress;
         emit SetFeeAddress(msg.sender, _feeAddress);
     }
 
-    function setReserveAddress(address _reserveAddress) public onlyOwner {
+    function setReserveAddress(address _reserveAddress) external onlyOwner {
         reserve = _reserveAddress;
         emit SetReserveAddress(_reserveAddress);
     }

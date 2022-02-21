@@ -22,7 +22,7 @@ contract Ownable is OwnableData {
         address newOwner,
         bool direct,
         bool renounce
-    ) public onlyOwner {
+    ) external onlyOwner {
         if (direct) {
             require(
                 newOwner != address(0) || renounce,
@@ -36,7 +36,7 @@ contract Ownable is OwnableData {
         }
     }
 
-    function claimOwnership() public {
+    function claimOwnership() external {
         address _pendingOwner = pendingOwner;
 
         require(
