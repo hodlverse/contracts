@@ -46,6 +46,7 @@ describe("Router", function () {
         );
 
         await this.factory.setBuyback(this.buyback.address)
+        await this.buyback.setReserve(this.reserve.address)
     });
     it("should set correct state variables", async function () {
         const factoryAddress = await this.router.factory()
@@ -55,7 +56,10 @@ describe("Router", function () {
         expect(wethAddress).to.equal(this.weth9.address);
     });
 
-    it("should be able to add liquidity if not enough approve", async function () {
+    it("should be able to add liquidity if not enough approve (erc20)", async function () {
+        await this.factory.createPair(this.firstErc20Token.address, this.secondErc20Token.address);
+        expect(await this.factory.allPairsLength()).to.equal(1);
+
         await expect(this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, "1000", "1000", "1", "1", this.alice.address, new Date().getTime())).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
 
         await this.firstErc20Token.approve(this.router.address, "50")
@@ -72,27 +76,69 @@ describe("Router", function () {
 
         await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, 10000, 10000, 1, 1, this.alice.address, new Date().getTime())
 
-        //await transactionHash.wait();
+        const lpTokenAddress = await this.factory.getPair(this.firstErc20Token.address, this.secondErc20Token.address)
 
-        expect(await this.firstErc20Token.balanceOf(this.alice.address)).to.equal("9999990000")
-        expect(await this.secondErc20Token.balanceOf(this.alice.address)).to.equal("9999990000")
+        const lpTokenContract = await this.ERC20Mock.attach(
+            lpTokenAddress
+        );
 
-        console.log(this.hodlLibrary.address)
+        expect(await lpTokenContract.balanceOf(this.alice.address)).to.equal("9000")
 
 
-        // await this.sushi.approve(this.bar.address, "50")
-        // await expect(this.bar.enter("100")).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
-        // await this.sushi.approve(this.bar.address, "100")
-        // await this.bar.enter("100")
-        // expect(await this.bar.balanceOf(this.alice.address)).to.equal("100")
+    })
+
+    it("should be able to add liquidity for eth", async function () {
+
+        await expect(this.router.addLiquidityETH(this.firstErc20Token.address, "1000", "1", "1", this.alice.address, new Date().getTime(), {
+            value: 1000000
+        })).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
+
+        await this.firstErc20Token.approve(this.router.address, "50")
+
+
+        await expect(this.router.addLiquidityETH(this.firstErc20Token.address, "1000", "1", "1", this.alice.address, new Date().getTime(), {
+            value: 1000000
+        })).to.be.revertedWith("ERC20: transfer amount exceeds allowance")
+
+        await this.firstErc20Token.approve(this.router.address, "1000000")
+
+
+        await this.router.addLiquidityETH(this.firstErc20Token.address, "1000", "1", "1", this.alice.address, new Date().getTime(), {
+            value: 100000
+        })
+
+        const lpTokenAddress = await this.factory.getPair(this.weth9.address, this.firstErc20Token.address)
+
+        const lpTokenContract = await this.ERC20Mock.attach(
+            lpTokenAddress
+        );
+
+        expect(await lpTokenContract.balanceOf(this.alice.address)).to.equal("9000")
+
     })
 
 
 
 
-    // it("should be able to add liquidity", async function () {
-    //     await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, 1, 1, 0, 0, this.alice.address, new Date().getTime());
-    //     expect(await this.factory.allPairsLength()).to.equal(1);
-    // })
+    it("should be able to swap erc20 tokens", async function () {
+        await this.firstErc20Token.approve(this.router.address, "1000000")
+        await this.secondErc20Token.approve(this.router.address, "1000000")
+
+        await this.factory.createPair(this.firstErc20Token.address, this.secondErc20Token.address);
+        await this.router.addLiquidityETH(this.firstErc20Token.address, "1000", "1", "1", this.alice.address, new Date().getTime(), {
+            value: 100000
+        })
+        expect(await this.factory.allPairsLength()).to.equal(2);
+
+        const lpTokenAddress = await this.factory.getPair(this.firstErc20Token.address, this.secondErc20Token.address)
+
+
+
+        const transactionHash = await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, 10000, 10000, 1, 1, this.alice.address, new Date().getTime())
+
+        await transactionHash.wait();
+        await this.router.swapExactTokensForTokens(10, 3, [this.firstErc20Token.address, this.secondErc20Token.address], this.alice.address, new Date().getTime())
+
+    })
 
 });
