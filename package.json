@@ -76,6 +76,7 @@
     "ts-generator": "^0.1.1",
     "ts-node": "^9.1.1",
     "typechain": "^4.0.2",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.2",
+    "@opengsn/gsn": "^2.1.0"
   }
 }

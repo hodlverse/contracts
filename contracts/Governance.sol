@@ -32,7 +32,7 @@ contract HODLGovernor is
     }
 
     function quorum(uint256 blockNumber)
-        external
+        public
         pure
         override
         returns (uint256)
@@ -43,7 +43,7 @@ contract HODLGovernor is
     // The following functions are overrides required by Solidity.
 
     function votingDelay()
-        external
+        public
         view
         override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -52,7 +52,7 @@ contract HODLGovernor is
     }
 
     function votingPeriod()
-        external
+        public
         view
         override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -61,7 +61,7 @@ contract HODLGovernor is
     }
 
     function getVotes(address account, uint256 blockNumber)
-        external
+        public
         view
         override(IGovernorUpgradeable, GovernorVotesCompUpgradeable)
         returns (uint256)
@@ -70,7 +70,7 @@ contract HODLGovernor is
     }
 
     function state(uint256 proposalId)
-        external
+        public
         view
         override(
             GovernorUpgradeable,
@@ -88,7 +88,7 @@ contract HODLGovernor is
         bytes[] memory calldatas,
         string memory description
     )
-        external
+        public
         override(
             GovernorUpgradeable,
             GovernorCompatibilityBravoUpgradeable,
@@ -100,7 +100,7 @@ contract HODLGovernor is
     }
 
     function proposalThreshold()
-        external
+        public
         view
         override(GovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
@@ -144,7 +144,7 @@ contract HODLGovernor is
     }
 
     function supportsInterface(bytes4 interfaceId)
-        external
+        public
         view
         override(
             GovernorUpgradeable,

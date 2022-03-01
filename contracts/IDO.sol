@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
 
-contract IDO is Ownable, Pausable {
+contract IDO is Ownable, Pausable, BaseRelayRecipient {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -58,16 +59,11 @@ contract IDO is Ownable, Pausable {
         uint256 _depositMin,
         uint256 _depositMax,
         uint256 _exchangeRate,
-        address _withdrawer,
         address usdtAddr,
-        address moneyAddr
+        address moneyAddr,
+        address _trustedForwarder
     ) public {
         require(_exchangeRate != 0, "MoneyIDO: exchange rate cannot be zero");
-
-        require(
-            _withdrawer != address(0),
-            "MoneyIDO: Invalid withdrawer address."
-        );
 
         saleStartTime = _saleStartTime;
         saleEndTime = _saleEndTime;
@@ -77,9 +73,10 @@ contract IDO is Ownable, Pausable {
         depositMax = _depositMax;
         exchangeRate = _exchangeRate;
 
-        withdrawer = _withdrawer;
         USDT = IERC20(usdtAddr);
         MONEY = IERC20(moneyAddr);
+
+        trustedForwarder = _trustedForwarder;
     }
 
     function setSaleStartTime(uint256 newSaleStartTime) external onlyOwner {
@@ -167,7 +164,7 @@ contract IDO is Ownable, Pausable {
             "MoneyIDO: MONEY balance not enough"
         );
 
-        uint256 finalAmount = balanceOf[msg.sender].add(amount);
+        uint256 finalAmount = balanceOf[_msgSender()].add(amount);
         require(
             finalAmount >= depositMin,
             "MoneyIDO: Does not meet minimum deposit requirements."
@@ -181,11 +178,11 @@ contract IDO is Ownable, Pausable {
             "MoneyIDO: Sale Cap overflow."
         );
 
-        balanceOf[msg.sender] = finalAmount;
+        balanceOf[_msgSender()] = finalAmount;
         totalUSDTBalance = totalUSDTBalance.add(amount);
 
-        USDT.safeTransferFrom(msg.sender, address(this), amount);
-        emit Deposited(msg.sender, amount);
+        USDT.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Deposited(_msgSender(), amount);
     }
 
     function claim() external whenNotPaused {
@@ -193,20 +190,20 @@ contract IDO is Ownable, Pausable {
             block.timestamp >= unlockTime,
             "MoneyIDO: IDO is not unlocked yet."
         );
-        require(balanceOf[msg.sender] > 0, "MoneyIDO: Insufficient balance.");
+        require(balanceOf[_msgSender()] > 0, "MoneyIDO: Insufficient balance.");
 
-        uint256 moneyAmount = _getMoneyForUSDT(balanceOf[msg.sender]);
+        uint256 moneyAmount = _getMoneyForUSDT(balanceOf[_msgSender()]);
 
-        balanceOf[msg.sender] = 0;
+        balanceOf[_msgSender()] = 0;
         totalMoneyClaimed = totalMoneyClaimed.add(moneyAmount);
 
-        MONEY.safeTransfer(msg.sender, moneyAmount);
-        emit Claimed(msg.sender, moneyAmount);
+        MONEY.safeTransfer(_msgSender(), moneyAmount);
+        emit Claimed(_msgSender(), moneyAmount);
     }
 
     function withdraw() external whenNotPaused {
         require(
-            msg.sender == withdrawer,
+            _msgSender() == withdrawer,
             "MoneyIDO: You can't withdraw funds."
         );
         require(
@@ -222,7 +219,7 @@ contract IDO is Ownable, Pausable {
 
     function withdrawRest() external whenNotPaused {
         require(
-            msg.sender == withdrawer,
+            _msgSender() == withdrawer,
             "MoneyIDO: You can't withdraw funds."
         );
         require(
@@ -244,7 +241,7 @@ contract IDO is Ownable, Pausable {
     function emergencyWithdraw() external whenPaused {
         uint256 withdrawAmount;
         address token;
-        if (msg.sender == withdrawer) {
+        if (_msgSender() == withdrawer) {
             withdrawAmount = MONEY.balanceOf(address(this));
             require(
                 withdrawAmount > 0,
@@ -252,19 +249,54 @@ contract IDO is Ownable, Pausable {
             );
 
             token = address(MONEY);
-            MONEY.safeTransfer(msg.sender, withdrawAmount);
+            MONEY.safeTransfer(_msgSender(), withdrawAmount);
         } else {
             require(
-                balanceOf[msg.sender] > 0,
+                balanceOf[_msgSender()] > 0,
                 "MoneyIDO:emergencyWithdraw:: Insufficient USDT balance."
             );
 
             token = address(USDT);
-            withdrawAmount = balanceOf[msg.sender];
+            withdrawAmount = balanceOf[_msgSender()];
 
-            balanceOf[msg.sender] = 0;
-            USDT.safeTransfer(msg.sender, withdrawAmount);
+            balanceOf[_msgSender()] = 0;
+            USDT.safeTransfer(_msgSender(), withdrawAmount);
         }
-        emit EmergencyWithdrawals(msg.sender, token, withdrawAmount);
+        emit EmergencyWithdrawals(_msgSender(), token, withdrawAmount);
+    }
+
+    /**
+     * OPTIONAL
+     * You should add one setTrustedForwarder(address _trustedForwarder)
+     * method with onlyOwner modifier so you can change the trusted
+     * forwarder address to switch to some other meta transaction protocol
+     * if any better protocol comes tomorrow or current one is upgraded.
+     */
+
+    /**
+     * Override this function.
+     * This version is to keep track of BaseRelayRecipient you are using
+     * in your contract.
+     */
+    function versionRecipient() external view override returns (string memory) {
+        return "1";
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(BaseRelayRecipient, Context)
+        returns (address payable ret)
+    {
+        return super._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(BaseRelayRecipient, Context)
+        returns (bytes memory ret)
+    {
+        return super._msgData();
     }
 }
