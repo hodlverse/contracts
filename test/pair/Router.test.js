@@ -126,25 +126,85 @@ describe("Router", function () {
     it("should be able to swap erc20 tokens", async function () {
         await this.firstErc20Token.approve(this.router.address, "1000000")
         await this.secondErc20Token.approve(this.router.address, "1000000")
+        const buybackAddress = this.buyback.address.toLowerCase()
+
+        const oldBalanceFirstTokenBalance = await this.firstErc20Token.balanceOf(this.alice.address)
+
+
+        const swapAmount = 10000
+
+
+        const oldBuyBackBalance = await this.firstErc20Token.balanceOf(buybackAddress)
 
 
 
         await this.factory.createPair(this.firstErc20Token.address, this.secondErc20Token.address);
 
+
         expect(await this.factory.allPairsLength()).to.equal(1);
-
-
-
         const swapFee = await this.factory.getSwapFee(this.alice.address)
 
+        await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, swapAmount, swapAmount, 1, 1, this.alice.address, new Date().getTime())
+
+        await this.router.swapExactTokensForTokens(swapAmount, 5, [this.firstErc20Token.address, this.secondErc20Token.address], this.alice.address, new Date().getTime())
+        const newBuyBackBalanceFromContract = await this.firstErc20Token.balanceOf(buybackAddress)
 
 
-        const transactionHash = await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, 10000, 10000, 1, 1, this.alice.address, new Date().getTime())
 
-        await transactionHash.wait();
-        await this.router.swapExactTokensForTokens(10, 5, [this.firstErc20Token.address, this.secondErc20Token.address], this.alice.address, new Date().getTime())
+        const newBalanceFirstTokenBalance = await this.firstErc20Token.balanceOf(this.alice.address)
 
-        expect(await this.firstErc20Token.balanceOf(this.alice.address)).to.equal("9999989990")
+
+
+        expect(oldBalanceFirstTokenBalance.sub(swapAmount*2).toString()).to.equal(newBalanceFirstTokenBalance.toString())
+
+
+        const buybackFee = swapAmount * (swapFee[1].toString()/1000)
+        const newBuyBalance = Number(buybackFee) + Number(oldBuyBackBalance.toString())
+
+        expect(newBuyBalance).to.equal(Number(newBuyBackBalanceFromContract.toString()))
+
+    })
+
+    it("should be able to swap erc20 tokens", async function () {
+        await this.firstErc20Token.approve(this.router.address, "1000000")
+        await this.secondErc20Token.approve(this.router.address, "1000000")
+        const buybackAddress = this.buyback.address.toLowerCase()
+
+        const oldBalanceFirstTokenBalance = await this.firstErc20Token.balanceOf(this.alice.address)
+
+
+        const swapAmount = 10000
+
+
+        const oldBuyBackBalance = await this.firstErc20Token.balanceOf(buybackAddress)
+
+
+
+        await this.factory.createPair(this.firstErc20Token.address, this.secondErc20Token.address);
+
+
+        expect(await this.factory.allPairsLength()).to.equal(1);
+        const swapFee = await this.factory.getSwapFee(this.alice.address)
+
+        await this.router.addLiquidity(this.firstErc20Token.address, this.secondErc20Token.address, swapAmount, swapAmount, 1, 1, this.alice.address, new Date().getTime())
+
+        await this.router.swapExactTokensForTokensSupportingFeeOnTransferTokens(swapAmount, 5, [this.firstErc20Token.address, this.secondErc20Token.address], this.alice.address, new Date().getTime())
+        const newBuyBackBalanceFromContract = await this.firstErc20Token.balanceOf(buybackAddress)
+
+
+
+        const newBalanceFirstTokenBalance = await this.firstErc20Token.balanceOf(this.alice.address)
+
+
+
+        expect(oldBalanceFirstTokenBalance.sub(swapAmount*2).toString()).to.equal(newBalanceFirstTokenBalance.toString())
+
+
+        const buybackFee = swapAmount * (swapFee[1].toString()/1000)
+        const newBuyBalance = Number(buybackFee) + Number(oldBuyBackBalance.toString())
+
+        expect(newBuyBalance).to.equal(Number(newBuyBackBalanceFromContract.toString()))
+
     })
 
     it("should be able to swap tokens with eth", async function () {
@@ -172,6 +232,33 @@ describe("Router", function () {
 
     })
 
+
+    it("should be able to swap tokens with eth", async function () {
+        const provider = waffle.provider;
+
+        await this.firstErc20Token.approve(this.router.address, "10000000000")
+
+
+        await this.factory.createPair(this.firstErc20Token.address, this.weth9.address);
+        const transactionHash = await this.router.addLiquidityETH(this.firstErc20Token.address, "1000", "1", "1", this.alice.address, new Date().getTime(), {
+            value: 10000000000
+        })
+
+        await transactionHash.wait();
+
+
+        expect(await this.factory.allPairsLength()).to.equal(1);
+
+        const swapFee = await this.factory.getSwapFee(this.alice.address)
+
+
+        const beforeETHBalancce = await provider.getBalance(this.alice.address);
+        await this.router.swapExactTokensForETHSupportingFeeOnTransferTokens(1000000000, 5, [this.firstErc20Token.address, this.weth9.address], this.alice.address, new Date().getTime())
+        const afterETHBalance = await provider.getBalance(this.alice.address);
+
+    })
+
+
     it("should be able to eth for tokens", async function () {
         const provider = waffle.provider;
 
@@ -190,12 +277,12 @@ describe("Router", function () {
 
         const swapFee = await this.factory.getSwapFee(this.alice.address)
 
-
         const beforeETHBalancce = await provider.getBalance(this.alice.address);
         await this.router.swapETHForExactTokens(1, [this.weth9.address, this.firstErc20Token.address, ], this.alice.address, new Date().getTime(), {
             value: 1000000000
         })
         const afterETHBalance = await provider.getBalance(this.alice.address);
+
 
 
     })
@@ -247,6 +334,35 @@ describe("Router", function () {
 
 
         await this.router.removeLiquidityETH(this.firstErc20Token.address, 10,1,1, this.alice.address, new Date().getTime())
+
+        const newLPBalance = await lpTokenContract.balanceOf(this.alice.address)
+        expect(Number(oldLPBalance.toString())).to.be.greaterThan(Number(newLPBalance.toString()));
+    })
+
+    it("should be able to remove eth liquidity", async function () {
+
+        await this.firstErc20Token.approve(this.router.address, "10000001000000")
+
+
+
+        await this.factory.createPair(this.firstErc20Token.address, this.weth9.address);
+        await this.router.addLiquidityETH(this.firstErc20Token.address, "1000000", "11", "11", this.alice.address, new Date().getTime(), {
+            value: 100000000
+        })
+
+        const lpTokenAddress = await this.factory.getPair(this.firstErc20Token.address, this.weth9.address)
+
+        const lpTokenContract = await this.ERC20Mock.attach(
+            lpTokenAddress
+        );
+        await lpTokenContract.approve(this.router.address, "1000000")
+        await lpTokenContract.approve(this.alice.address, "1000000")
+
+
+        const oldLPBalance = await lpTokenContract.balanceOf(this.alice.address)
+
+
+        await this.router.removeLiquidityETHSupportingFeeOnTransferTokens(this.firstErc20Token.address, 10,1,1, this.alice.address, new Date().getTime())
 
         const newLPBalance = await lpTokenContract.balanceOf(this.alice.address)
         expect(Number(oldLPBalance.toString())).to.be.greaterThan(Number(newLPBalance.toString()));
