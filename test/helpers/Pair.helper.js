@@ -3,7 +3,7 @@ const Token = require("./Token.helper");
 const {deploy} =  require('../utilities/deploy')
 
 class Pairs {
-  constructor(_admin, _investor) {
+  constructor(_admin) {
     this.admin = _admin;
     this.tokenHelper = new Token(this.admin);
   }
@@ -32,6 +32,10 @@ class Pairs {
       factory: this.factory,
       router: this.router,
     };
+  }
+
+  async setBuyback(buybackAddress) {
+    await this.factory.setBuyback(buybackAddress);
   }
 
   async createPair(token0, token1) {
