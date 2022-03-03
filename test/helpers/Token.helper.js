@@ -1,5 +1,5 @@
 const config = require("../config");
-const deploy = require("../utilities/deploy");
+const {deploy} = require("../utilities/deploy");
 
 class Token {
   constructor(_admin) {

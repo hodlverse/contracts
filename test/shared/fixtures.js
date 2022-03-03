@@ -1,16 +1,29 @@
 const {deploy, attach} = require('../utilities/deploy')
 const {expandToNDecimals} =  require('../utilities/index')
+const TokenHelper = require('../helpers/Token.helper')
+const PairHelper = require('../helpers/Pair.helper')
+const { ethers, waffle } = require("hardhat");
+
 async function v2Fixture() {
-    const money = await deploy("MoneyToken" )
-    const tokenA = await deploy("ERC20Mock", ["Token One", "TOKEN1", expandToNDecimals(10000)])
-    const tokenB = await deploy("ERC20Mock", ["Token Two", "TOKEN2", expandToNDecimals(10000)])
-    const wethPartner = await deploy("ERC20Mock", ["Token Three", "TOKEN3", expandToNDecimals(10000)])
-    const weth9 = await deploy("WETH9")
-    const goldenNFTMock = await deploy("GoldenNFTMock")
+    const signers = await ethers.getSigners();
+    const alice = signers[0];
+    const bob = signers[0];
 
-    const factory = await deploy("Factory", [money.address, goldenNFTMock.address, 1])
+    const tokenHelper = new TokenHelper(alice)
+    const pairHelper = new PairHelper(alice, alice)
 
-    const router = await deploy("Router", [factory.address, weth9.address])
+
+    const {moneyToken, wethToken, factory, router} = await pairHelper.init()
+
+    const money = moneyToken
+    const tokenA = await tokenHelper.deployERC()
+    const tokenB =  await tokenHelper.deployERC()
+    const wethPartner =  await tokenHelper.deployERC()
+    const weth9 = wethToken
+
+
+
+
 
     const buyback = await deploy("Buyback", [router.address, money.address])
     const reserve = await deploy("Reserve", [money.address, buyback.address])

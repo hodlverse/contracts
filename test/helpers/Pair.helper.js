@@ -1,5 +1,6 @@
 const { ethers } = require("hardhat");
 const Token = require("./Token.helper");
+const {deploy} =  require('../utilities/deploy')
 
 class Pairs {
   constructor(_admin, _investor) {
@@ -9,6 +10,8 @@ class Pairs {
 
   async init() {
     const { moneyToken, wethToken } = await this.tokenHelper.init();
+
+
     const goldenTicket = await this.tokenHelper.deployERC1155();
 
     this.factory = await deploy("Factory", [
@@ -23,7 +26,7 @@ class Pairs {
     ]);
 
     return {
-      moneyToken,
+      moneyToken: moneyToken,
       wethToken,
       goldenTicket,
       factory: this.factory,
