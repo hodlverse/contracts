@@ -4,6 +4,8 @@ const { BigNumber } = require("ethers");
 const BASE_TEN = 10;
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
+const MINIMUM_LIQUIDITY = Math.pow(10, 3)
+
 function encodeParameters(types, values) {
   const abi = new ethers.utils.AbiCoder();
   return abi.encode(types, values);
@@ -26,4 +28,5 @@ module.exports = {
   ADDRESS_ZERO,
   encodeParameters,
   expandToNDecimals,
+  MINIMUM_LIQUIDITY
 };
