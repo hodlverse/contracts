@@ -1,63 +1,52 @@
-const {deploy, attach} = require('../utilities/deploy')
-const {expandToNDecimals} =  require('../utilities/index')
-const TokenHelper = require('../helpers/Token.helper')
-const PairHelper = require('../helpers/Pair.helper')
+const { deploy, attach } = require("../utilities/deploy");
+const Reserve = require("../helpers/Reserve.helper");
 const { ethers, waffle } = require("hardhat");
 
 async function v2Fixture() {
-    const signers = await ethers.getSigners();
-    const alice = signers[0];
-    const bob = signers[0];
+  const signers = await ethers.getSigners();
+  const alice = signers[0];
 
-    const tokenHelper = new TokenHelper(alice)
-    const pairHelper = new PairHelper(alice, alice)
+  const reserveHelper = new Reserve(alice);
 
+  const {
+    moneyToken,
+    wethToken,
+    goldenTicket,
+    factory,
+    router,
+    buyback,
+    reserve,
+  } = await reserveHelper.init();
 
-    const {moneyToken, wethToken, factory, router} = await pairHelper.init()
+  const money = moneyToken;
+  const tokenA = await reserveHelper.deployERC();
+  const tokenB = await reserveHelper.deployERC();
+  const wethPartner = await reserveHelper.deployERC();
+  const weth9 = wethToken;
 
-    const money = moneyToken
-    const tokenA = await tokenHelper.deployERC()
-    const tokenB =  await tokenHelper.deployERC()
-    const wethPartner =  await tokenHelper.deployERC()
-    const weth9 = wethToken
+  const pairAddress = await reserveHelper.createPair(tokenA, tokenB);
+  const pair = await attach("Core", pairAddress);
 
+  const WETHPairAddress = await reserveHelper.createPair(weth9, wethPartner);
+  const WETHPair = await attach("Core", WETHPairAddress);
 
+  const token0Address = await pair.token0();
 
+  const token0 = tokenA.address === token0Address ? tokenA : tokenB;
+  const token1 = tokenA.address === token0Address ? tokenB : tokenA;
 
-
-    const buyback = await deploy("Buyback", [router.address, money.address])
-    const reserve = await deploy("Reserve", [money.address, buyback.address])
-
-    await factory.setBuyback(buyback.address);
-    await buyback.setReserve(reserve.address);
-
-    await factory.createPair(tokenA.address, tokenB.address)
-    const pairAddress = await factory.getPair(tokenA.address, tokenB.address)
-    const pair = await attach("Core",pairAddress);
-
-
-    await factory.createPair(weth9.address, wethPartner.address)
-    const WETHPairAddress = await factory.getPair(weth9.address, wethPartner.address)
-    const WETHPair = await attach("Core",WETHPairAddress);
-
-
-    const token0Address = await pair.token0()
-
-    const token0 = tokenA.address === token0Address ? tokenA : tokenB
-    const token1 = tokenA.address === token0Address ? tokenB : tokenA
-
-    return {
-        token0,
-        token1,
-        weth9,
-        wethPartner,
-        factory,
-        router,
-        pair,
-        WETHPair,
-        money,
-        reserve
-    }
+  return {
+    token0,
+    token1,
+    weth9,
+    wethPartner,
+    factory,
+    router,
+    pair,
+    WETHPair,
+    money,
+    reserve,
+  };
 }
 
 module.exports = v2Fixture;

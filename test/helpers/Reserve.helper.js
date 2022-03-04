@@ -1,27 +1,26 @@
 const Pairs = require("./Pair.helper");
+const { deploy } = require("../utilities/deploy");
 
-class Reserves {
+class Reserves extends Pairs {
   constructor(_admin) {
+    super(_admin);
     this.admin = _admin;
-    this.pairHelper = new Pairs(this.admin);
   }
 
   async init() {
     const { moneyToken, wethToken, goldenTicket, factory, router } =
-      await this.pairHelper.init();
+      await super.init();
 
     this.buyback = await deploy("Buyback", [
       router.address,
       moneyToken.address,
     ]);
-
-    await this.pairHelper.setBuyback(this.buyback.address);
+    await super.setBuyback(this.buyback.address);
 
     this.reserve = await deploy("Reserve", [
       moneyToken.address,
       this.buyback.address,
     ]);
-
     await this.buyback.setReserve(this.reserve.address);
 
     return {

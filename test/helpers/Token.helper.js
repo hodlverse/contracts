@@ -1,5 +1,5 @@
 const config = require("../config");
-const {deploy} = require("../utilities/deploy");
+const { deploy } = require("../utilities/deploy");
 
 class Token {
   constructor(_admin) {
@@ -19,16 +19,15 @@ class Token {
   }
 
   async deployERC(deployer = this.admin) {
-    return await deploy("ERC20Mock", [
-      config.ercTokenName,
-      config.ercTokenSymbol,
-      config.ercTokenSupply,
-      { from: deployer },
-    ]);
+    return await deploy(
+      "ERC20Mock",
+      [config.ercTokenName, config.ercTokenSymbol, config.ercTokenSupply],
+      { from: deployer }
+    );
   }
 
   async deployERC1155(deployer = this.admin) {
-    return await deploy("GoldenNFTMock", [{ from: deployer }]);
+    return await deploy("GoldenNFTMock", [], { from: deployer });
   }
 
   // transferring tokens from admin to other wallets
