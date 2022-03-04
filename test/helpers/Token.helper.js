@@ -18,10 +18,15 @@ class Token {
     };
   }
 
-  async deployERC(deployer = this.admin) {
+  async deployERC(decimals = 18, deployer = this.admin) {
     return await deploy(
       "ERC20Mock",
-      [config.ercTokenName, config.ercTokenSymbol, config.ercTokenSupply],
+      [
+        config.ercTokenName,
+        config.ercTokenSymbol,
+        decimals,
+        config.ercTokenSupply,
+      ],
       { from: deployer }
     );
   }

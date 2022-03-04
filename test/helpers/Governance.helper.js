@@ -1,5 +1,6 @@
 const { delay } = require("../config");
 const Token = require("./Token.helper");
+const { deploy } = require("../utilities/deploy");
 
 class Governance {
   constructor(_admin) {
