@@ -46,6 +46,7 @@ async function v2Fixture() {
     WETHPair,
     money,
     reserve,
+    buyback
   };
 }
 

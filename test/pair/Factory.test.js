@@ -2,7 +2,7 @@ const { use, expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
 const { solidity } = waffle;
 const { ADDRESS_ZERO } = require("../utilities/index");
-
+const loadFixture = require("./fixtures");
 use(solidity);
 
 describe("Factory", function () {
@@ -26,36 +26,27 @@ describe("Factory", function () {
     this.Router = await ethers.getContractFactory("Router");
   });
   beforeEach(async function () {
-    this.firstErc20Token = await this.ERC20Mock.deploy(
-      "Token One",
-      "TOKEN1",
-      10000000000
-    );
-    this.secondErc20Token = await this.ERC20Mock.deploy(
-      "Token Two",
-      "TOKEN2",
-      10000000000
-    );
+    const {
+      token0,
+      token1,
+      money,
+      factory,
+      router,
+      buyback,
+      reserve,
+      weth9,
+    } = await loadFixture();
 
-    this.weth9 = await this.WETH9.deploy();
-    this.money = await this.MoneyToken.deploy();
-    this.factory = await this.Factory.deploy(
-      this.money.address,
-      this.money.address,
-      1
-    );
-    this.router = await this.Router.deploy(
-      this.factory.address,
-      this.weth9.address
-    );
-    this.buyback = await this.Buyback.deploy(
-      this.router.address,
-      this.money.address
-    );
-    this.reserve = await this.Reserve.deploy(
-      this.money.address,
-      this.buyback.address
-    );
+    this.firstErc20Token = token0
+
+    this.secondErc20Token = token1
+
+    this.weth9 = weth9
+    this.money =money
+    this.factory =factory
+    this.router = router
+    this.buyback =buyback
+    this.reserve = reserve
 
     await this.factory.setBuyback(this.buyback.address);
   });
@@ -124,13 +115,5 @@ describe("Factory", function () {
 
     await this.factory.connect(this.carol).setDiscountEligibilityBalance(11);
     expect(await this.factory.discountEligibilityBalance()).to.equal(11);
-  });
-
-  it("should be able to create pair", async function () {
-    await this.factory.createPair(
-      this.firstErc20Token.address,
-      this.secondErc20Token.address
-    );
-    expect(await this.factory.allPairsLength()).to.equal(1);
   });
 });
