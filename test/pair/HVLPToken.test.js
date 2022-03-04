@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
-const loadFixture = require("../shared/fixtures");
+const loadFixture = require("./fixtures");
 const { expandToNDecimals } = require("../utilities/index");
 const { signERC2612Permit } = require("eth-permit");
 

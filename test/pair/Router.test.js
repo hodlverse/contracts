@@ -2,7 +2,7 @@ const { use, expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
 const { solidity } = waffle;
 use(solidity);
-const loadFixture = require("../shared/fixtures");
+const loadFixture = require("./fixtures");
 const { expandToNDecimals } = require("../utilities/index");
 
 describe("Router", function () {
