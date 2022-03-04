@@ -29,6 +29,7 @@
     "flatten": "hardhat flatten",
     "build": "hardhat compile",
     "console": "hardhat console",
+    "coverage": "hardhat coverage",
     "local:deploy": "hardhat --network hardhat deploy",
     "mainnet:deploy": "hardhat --network mainnet deploy",
     "mainnet:export": "hardhat --network mainnet export --export exports/mainnet.json",
