@@ -45,7 +45,7 @@ describe("MainBridge", function () {
         })
         expect(await this.moneyToken.balanceOf(this.mainBridge.address)).to.equal("10");
 
-        await this.mainBridge.fillSideETHSwap('0xde9f71148e893be4442741d95369eac73fd7c7a53d4d9d46acd30aba5a64d06c', this.moneyToken.address,this.alice.address, 10)
+        await this.mainBridge.fillSideETHSwap('0xde9f71148e893be4442741d95369eac73fd7c7a53d4d9d46acd30aba5a64d06c', this.moneyToken.address, this.alice.address, 10)
         expect(await this.moneyToken.balanceOf(this.mainBridge.address)).to.equal("0");
     });
 
