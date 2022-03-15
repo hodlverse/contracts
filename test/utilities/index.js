@@ -19,11 +19,32 @@ function expandToNDecimals(amount, decimals = 18) {
 }
 
 async function verifyBalanceChange(account, change, todo) {
-  let before = new BN(await web3.eth.getBalance(account));
+  let before = BigNumber.from(await web3.eth.getBalance(account));
   await todo();
-  let after = new BN(await web3.eth.getBalance(account));
+  let after = BigNumber.from(await web3.eth.getBalance(account));
   let actual = before.sub(after);
   assertEq(change, actual);
+}
+
+function etherUnsigned(num) {
+  return BigNumber.from(num);
+}
+
+async function freezeTime(seconds) {
+  await rpc({ method: "evm_freezeTime", params: [seconds] });
+  return rpc({ method: "evm_mine" });
+}
+
+async function rpc(request) {
+  return new Promise((okay, fail) =>
+    web3.currentProvider.send(request, (err, res) =>
+      err ? fail(err) : okay(res)
+    )
+  );
+}
+
+function keccak256(values) {
+  return ethers.utils.keccak256(values);
 }
 
 module.exports = {
@@ -31,5 +52,7 @@ module.exports = {
   MAX_INT,
   encodeParameters,
   expandToNDecimals,
+  etherUnsigned,
+  keccak256,
   MINIMUM_LIQUIDITY,
 };

@@ -1,5 +1,6 @@
 const Pairs = require("./Pair.helper");
 const { deploy } = require("../utilities/deploy");
+const { MAX_INT } = require("../utilities");
 
 class Reserves extends Pairs {
   constructor(_admin) {
@@ -54,6 +55,41 @@ class Reserves extends Pairs {
 
   async addWithdrawers(withdrawers, proportions) {
     await this.reserve.setReserve(withdrawers, proportions);
+  }
+
+  async dummySwapsForRewards(user) {
+    await this.moneyToken.transfer(user.address, "10000000000000000000000");
+    await this.addLiquidityETH(
+      user,
+      this.moneyToken,
+      "100000000000000000",
+      "100000000000000000"
+    );
+
+    await this.moneyToken
+      .connect(user)
+      .approve(this.router.address, "10000000000000");
+
+    await this.swapTokensForExactETH(
+      user,
+      [this.moneyToken.address, this.wethToken.address],
+      "1000000",
+      MAX_INT
+    );
+
+    await this.swapTokensForExactETH(
+      user,
+      [this.moneyToken.address, this.wethToken.address],
+      "1000000",
+      MAX_INT
+    );
+
+    await this.swapTokensForExactETH(
+      user,
+      [this.moneyToken.address, this.wethToken.address],
+      "1000000",
+      MAX_INT
+    );
   }
 }
 

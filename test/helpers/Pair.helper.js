@@ -153,12 +153,12 @@ class Pairs extends Token {
       });
   }
 
-  async swapTokensForExactETH(user, path, ethAmountOut, expectedIn = 1) {
+  async swapTokensForExactETH(user, path, ethAmountOut, expectedIn) {
     await this.router
       .connect(user)
       .swapTokensForExactETH(
-        expectedIn,
         ethAmountOut,
+        expectedIn,
         path,
         user.address,
         new Date().getTime()

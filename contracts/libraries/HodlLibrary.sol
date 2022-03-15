@@ -85,8 +85,9 @@ library HodlLibrary {
             reserveIn > 0 && reserveOut > 0,
             "HodlLibrary: INSUFFICIENT_LIQUIDITY"
         );
-        uint256 swapFee = IFactory(factory).swapFee();
-        uint256 amountInWithFee = amountIn.mul(1000 - swapFee);
+
+        uint256 feeFactor = 1000 - IFactory(factory).swapFee();
+        uint256 amountInWithFee = amountIn.mul(feeFactor);
         uint256 numerator = amountInWithFee.mul(reserveOut);
         uint256 denominator = reserveIn.mul(1000).add(amountInWithFee);
         amountOut = numerator / denominator;
@@ -104,9 +105,9 @@ library HodlLibrary {
             reserveIn > 0 && reserveOut > 0,
             "HodlLibrary: INSUFFICIENT_LIQUIDITY"
         );
-        uint256 swapFee = IFactory(factory).swapFee();
+        uint256 feeFactor = 1000 - IFactory(factory).swapFee();
         uint256 numerator = reserveIn.mul(amountOut).mul(1000);
-        uint256 denominator = reserveOut.sub(amountOut).mul(1000 - swapFee);
+        uint256 denominator = reserveOut.sub(amountOut).mul(feeFactor);
         amountIn = (numerator / denominator).add(1);
     }
 
