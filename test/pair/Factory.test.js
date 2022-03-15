@@ -14,16 +14,6 @@ describe("Factory", function () {
     this.dev = this.signers[3];
     this.minter = this.signers[4];
     this.owner = this.signers[5];
-    this.router = this.signers[6];
-
-    this.ERC20Mock = await ethers.getContractFactory("ERC20Mock");
-
-    this.WETH9 = await ethers.getContractFactory("WETH9");
-    this.MoneyToken = await ethers.getContractFactory("MoneyToken");
-    this.Factory = await ethers.getContractFactory("Factory");
-    this.Buyback = await ethers.getContractFactory("Buyback");
-    this.Reserve = await ethers.getContractFactory("Reserve");
-    this.Router = await ethers.getContractFactory("Router");
   });
   beforeEach(async function () {
     const {
