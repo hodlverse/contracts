@@ -43,7 +43,7 @@ const main = async () => {
     "GoldenNFTMock",
     [],
     deployer,
-    "contracts/GoldenNFTMock.sol:GoldenNFTMock",
+    "contracts/mocks/GoldenNFTMock.sol:GoldenNFTMock",
     chainId
   );
 
@@ -116,7 +116,7 @@ const main = async () => {
       depositPeriod,
     ],
     deployer,
-    "contracts/FarmFactory.sol:FarmFactory",
+    "contracts/farm/FarmFactory.sol:FarmFactory",
     chainId
   );
 

@@ -68,7 +68,6 @@ module.exports = {
       live: true,
       saveDeployments: true,
       tags: ["staging"],
-      gasPrice: 200000000000,
       gasMultiplier: 2,
     },
     fantom: {
@@ -112,7 +111,7 @@ module.exports = {
       saveDeployments: true,
     },
     "bsc-testnet": {
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       accounts,
       chainId: 97,
       live: true,
