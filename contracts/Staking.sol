@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IReserve.sol";
 
-import "hardhat/console.sol";
-
 // Staking is the coolest bar in town. You come in with some Money, and leave with more!
 // The longer you stay, the more Money you get.
 //This contract handles swapping to and from xMoney, HODL's staking token.

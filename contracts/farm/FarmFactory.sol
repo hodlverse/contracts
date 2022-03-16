@@ -32,9 +32,9 @@ contract FarmFactory is Ownable {
     uint256 public globalRoundId;
 
     //only after this time, rewards will be fetched and ditributed to the users from last date
-    uint256 public reserveDistributionSchedule = 30 days;
     uint256 public lastReserveDistributionTimestamp;
-    uint256 public depositPeriod = 24 hours;
+    uint256 public reserveDistributionSchedule;
+    uint256 public depositPeriod;
 
     event NewPool(
         address indexed farm,
@@ -62,7 +62,9 @@ contract FarmFactory is Ownable {
     constructor(
         address _money,
         address _feeAddress,
-        address _reserve
+        address _reserve,
+        uint256 _reserveDistributionSchedule,
+        uint256 _depositPeriod
     ) public {
         require(
             _money != address(0),
@@ -80,6 +82,9 @@ contract FarmFactory is Ownable {
         money = _money;
         feeAddress = _feeAddress;
         reserve = _reserve;
+
+        reserveDistributionSchedule = _reserveDistributionSchedule; // 30 days;
+        depositPeriod = _depositPeriod; // 24 hours;
     }
 
     function poolLength() external view returns (uint256) {
@@ -133,7 +138,8 @@ contract FarmFactory is Ownable {
             _lpToken,
             _depositFeeBP,
             globalRoundId,
-            farmId
+            farmId,
+            depositPeriod
         );
 
         farms[farmId] = address(farm);
