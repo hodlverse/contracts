@@ -15,7 +15,7 @@ require("hardhat-watcher");
 require("solidity-coverage");
 
 const { removeConsoleLog } = require("hardhat-preprocessor");
-const accounts = [process.env.DEPLOYER_PRIVATE_KEY];
+const accounts = {mnemonic: process.env.MNEMONIC};
 
 module.exports = {
   abiExporter: {
