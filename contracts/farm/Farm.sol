@@ -116,6 +116,9 @@ contract Farm is ReentrancyGuard {
         309 = 4  (259 - 110) = 149/50 = 2+1 = 4
      */
     function getCurrentRoundId() public view returns (uint256 depositForRound) {
+        if ( deposits.length <= 0){
+            return 0;
+        }
         // zero indexed round ids
         uint256 timeDiff = block.timestamp.sub(poolStartTime);
 

@@ -253,4 +253,8 @@ contract FarmFactory is Ownable {
         reserveDistributionSchedule = _reserveDistributionSchedule;
         emit UpdatedReserveDistributionSchedule(_reserveDistributionSchedule);
     }
+
+    function userInfo(address farmAddress, address user) public view returns (uint256, uint256) {
+        return Farm(farmAddress).userInfo(user);
+    }
 }
