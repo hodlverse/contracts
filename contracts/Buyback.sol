@@ -86,6 +86,11 @@ contract Buyback is IBuyback, Ownable, Pausable {
         if (token == money) return transferMoneyToReserve();
 
         require(
+            path.length != 0,
+            "Buyback:swapAndSendToReserve:: ERR_INVALID_PATH"
+        );
+
+        require(
             path[path.length - 1] == money,
             "Buyback:swapAndSendToReserve:: ERR_NOT_MONEY"
         );
@@ -93,10 +98,7 @@ contract Buyback is IBuyback, Ownable, Pausable {
             token != address(0),
             "Buyback:swapAndSendToReserve:: ERR_INVALID_TOKEN_ADDRESS"
         );
-        require(
-            path.length != 0,
-            "Buyback:swapAndSendToReserve:: ERR_INVALID_PATH"
-        );
+
         require(
             path[path.length - 1] != path[0],
             "Buyback:swapAndSendToReserve:: ERR_SAME_TOKEN_SWAP"

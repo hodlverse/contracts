@@ -103,7 +103,8 @@ contract Reserve is IReserve, Ownable, Pausable {
     {
         require(
             withdrawers[_oldWithdrawer].isEligible &&
-                !withdrawers[_newWithdrawer].isEligible,
+                !withdrawers[_newWithdrawer].isEligible &&
+                _newWithdrawer != address(0),
             "Reserve:updateWithdrawer:: ERR_WITHDRAWER"
         );
 

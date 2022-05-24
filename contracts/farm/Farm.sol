@@ -29,7 +29,7 @@ contract Farm is ReentrancyGuard {
 
     //only after this time, rewards will be fetched and ditributed to the users from last date
     uint256 public lastReserveDistributionTimestamp;
-    uint256 public constant depositPeriod = 24 hours;
+    uint256 public depositPeriod; // 24 hours;
     uint256 public constant REWARD_PRECISION = 10**12;
 
     uint256[] cumulativeMoneyPerShare;
@@ -63,7 +63,8 @@ contract Farm is ReentrancyGuard {
         IERC20 _lpToken,
         uint16 _depositFeeBP,
         uint256 _globalRoundId,
-        uint256 _farmId
+        uint256 _farmId,
+        uint256 _depositPeriod
     ) public {
         require(
             _money != address(0),
@@ -79,6 +80,8 @@ contract Farm is ReentrancyGuard {
         poolStartTime = block.timestamp;
         globalRoundId = _globalRoundId;
         farmId = _farmId;
+
+        depositPeriod = _depositPeriod;
     }
 
     modifier onlyFactory() {
@@ -96,7 +99,7 @@ contract Farm is ReentrancyGuard {
     }
 
     /**
-        roundId = 
+        roundId:
         if (startTime - block.timestamp) < depositPeriod => 0
         else
         (startTime + depositPeriod - block.timestamp) < 30 days => 1
@@ -116,6 +119,9 @@ contract Farm is ReentrancyGuard {
         309 = 4  (259 - 110) = 149/50 = 2+1 = 4
      */
     function getCurrentRoundId() public view returns (uint256 depositForRound) {
+        if ( deposits.length <= 0){
+            return 0;
+        }
         // zero indexed round ids
         uint256 timeDiff = block.timestamp.sub(poolStartTime);
 
@@ -141,7 +147,7 @@ contract Farm is ReentrancyGuard {
     }
 
     function getMoneyPerShare(uint256 _round) external view returns (uint256) {
-        if (cumulativeMoneyPerShare.length > _round) return 0;
+        if (cumulativeMoneyPerShare.length <= _round) return 0;
         if (cumulativeMoneyPerShare.length == 1)
             return cumulativeMoneyPerShare[_round];
         return
@@ -151,7 +157,7 @@ contract Farm is ReentrancyGuard {
     }
 
     function getPoolDeposits(uint256 _round) external view returns (uint256) {
-        if (deposits.length > _round) return 0;
+        if (deposits.length <= _round) return 0;
         return deposits[_round];
     }
 
@@ -174,27 +180,33 @@ contract Farm is ReentrancyGuard {
         if (lastPoolRoundUpdated != 0) lastPoolRoundUpdated--;
 
         uint256 rewardIndex = globalRoundId.add(lastPoolRoundUpdated);
-        uint256 totalRounds = IFarmFactory(factory).globalRoundId().sub(
-            rewardIndex
-        );
+        uint256 totalRounds = IFarmFactory(factory)
+            .globalRoundId()
+            .sub(rewardIndex)
+            .add(1);
 
         uint256 totalAllocPoint = IFarmFactory(factory).totalAllocPoint();
 
         for (uint256 round = 1; round <= totalRounds; round++) {
             uint256 reward = IFarmFactory(factory).getRewards(
-                rewardIndex + round
+                rewardIndex + round - 1
             );
-            uint256 share = (reward.mul(allocPoint))
+
+            uint256 roundRewards = (reward.mul(allocPoint))
                 .div(totalAllocPoint)
-                .mul(REWARD_PRECISION)
-                .div(deposits[round]);
+                .mul(REWARD_PRECISION);
+
+            uint256 share = roundRewards.div(deposits[round - 1]);
 
             //to initialise 0th round
             if (cumulativeMoneyPerShare.length != 0)
-                share = share.add(cumulativeMoneyPerShare[round.sub(1)]);
+                share = share.add(cumulativeMoneyPerShare[round.sub(2)]);
 
             cumulativeMoneyPerShare.push(share);
+            availableRewards = availableRewards.add(roundRewards);
         }
+
+        lastReserveDistributionTimestamp = block.timestamp;
 
         emit PoolUpdated();
     }
@@ -203,8 +215,12 @@ contract Farm is ReentrancyGuard {
         UserInfo memory user = userInfo[_user];
         if (user.amount == 0) return 0;
 
+        if (cumulativeMoneyPerShare.length == 0) return 0;
+
         uint256 start = user.entryFarmRound;
         uint256 end = cumulativeMoneyPerShare.length - 1;
+
+        if (end < start) return 0;
 
         uint256 totalRewardPerShare;
 
@@ -273,12 +289,14 @@ contract Farm is ReentrancyGuard {
         _updateRewards();
 
         uint256 pendingRewards = pendingMoney(_user);
+
         if (pendingRewards > 0) {
             availableRewards = availableRewards.sub(pendingRewards);
             IFarmFactory(factory).safeMoneyTransfer(_user, pendingRewards);
         }
 
         uint256 currentRound = getCurrentRoundId();
+
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
 

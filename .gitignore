@@ -10,5 +10,6 @@ yarn.lock
 coverage.json
 .env
 .DS_Store
-
+.idea
 deployments/
+.deps

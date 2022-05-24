@@ -29,6 +29,7 @@
     "flatten": "hardhat flatten",
     "build": "hardhat compile",
     "console": "hardhat console",
+    "coverage": "hardhat coverage",
     "local:deploy": "hardhat --network hardhat deploy",
     "mainnet:deploy": "hardhat --network mainnet deploy",
     "mainnet:export": "hardhat --network mainnet export --export exports/mainnet.json",
@@ -77,5 +78,10 @@
     "ts-node": "^9.1.1",
     "typechain": "^4.0.2",
     "typescript": "^4.2.2"
+  },
+  "dependencies": {
+    "eth-permit": "^0.2.1",
+    "ethereumjs-abi": "^0.6.8",
+    "ethereumjs-util": "^7.1.4"
   }
 }

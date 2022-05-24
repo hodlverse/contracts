@@ -136,7 +136,7 @@ contract IDO is Ownable, Pausable {
     function pause() external onlyOwner whenNotPaused {
         require(
             block.timestamp < unlockTime,
-            "MoneyIDO: cannot be paused after unock time"
+            "MoneyIDO: cannot be paused after unlock time"
         );
         _pause();
     }
