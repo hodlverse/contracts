@@ -4,12 +4,15 @@ const { solidity } = waffle;
 const { BigNumber, utils } = require("ethers");
 use(solidity);
 
-const { advanceBlockTo, latest } = require("./utilities/time");
+const { advanceTimeAndBlock, latest } = require("./utilities/time");
 const Token = require("./helpers/Token.helper");
 const { expandToNDecimals, ADDRESS_ZERO, MAX_INT } = require("./utilities");
 
 describe("Money IDO", function () {
   const usdtDecimals = 6;
+
+  const endTimestamp = 60;
+  const unlockTimestamp = 66;
 
   const expandToUSDT = (num) => expandToNDecimals(num, usdtDecimals);
 
@@ -29,10 +32,12 @@ describe("Money IDO", function () {
     this.usdt = await this.tokenHelper.deployERC(usdtDecimals);
     this.latestTimestamp = await latest();
 
+
+
     this.ido = await this.IDO.deploy(
       this.latestTimestamp, // sale start time
-      this.latestTimestamp.add(500), // sale end time = 1 hour + start time
-      this.latestTimestamp.add(1000), // sale unlock time = 1 hour + end time
+      this.latestTimestamp.add(endTimestamp), // sale end time = 1 hour + start time
+      this.latestTimestamp.add(unlockTimestamp), // sale unlock time = 1 hour + end time
       expandToUSDT(10000), // sale cap = 10000 usdt
       expandToUSDT(1000), // deposit min = 1000 usdt
       expandToUSDT(2000), // deposit max = 2000 usdt
@@ -114,13 +119,13 @@ describe("Money IDO", function () {
       await expect(
         this.ido
           .connect(this.alice)
-          .setSaleEndTime(this.latestTimestamp.add(100))
+          .setSaleEndTime(this.latestTimestamp.add(10))
       ).to.be.revertedWith("Ownable: caller is not the owner");
 
       await expect(
         this.ido
           .connect(this.owner)
-          .setSaleEndTime(this.latestTimestamp.sub(100))
+          .setSaleEndTime(this.latestTimestamp.sub(10))
       ).to.be.revertedWith("MoneyIDO: Invalid sale end time");
 
       await expect(
@@ -131,10 +136,10 @@ describe("Money IDO", function () {
 
       await this.ido
         .connect(this.owner)
-        .setSaleEndTime(this.latestTimestamp.add(500));
+        .setSaleEndTime(this.latestTimestamp.add(endTimestamp));
 
       const saleEndTime = await this.ido.saleEndTime();
-      expect(saleEndTime.eq(this.latestTimestamp.add(500))).to.equal(true);
+      expect(saleEndTime.eq(this.latestTimestamp.add(endTimestamp))).to.equal(true);
     });
 
     it("should set withdrawer", async function () {
@@ -156,21 +161,21 @@ describe("Money IDO", function () {
       await expect(
         this.ido
           .connect(this.alice)
-          .setUnlockTime(this.latestTimestamp.add(100))
+          .setUnlockTime(this.latestTimestamp.add(10))
       ).to.be.revertedWith("Ownable: caller is not the owner");
 
       await expect(
         this.ido
           .connect(this.owner)
-          .setUnlockTime(this.latestTimestamp.add(100))
+          .setUnlockTime(this.latestTimestamp.add(10))
       ).to.be.revertedWith("MoneyIDO: Invalid unlock time");
 
       await this.ido
         .connect(this.owner)
-        .setUnlockTime(this.latestTimestamp.add(5000));
+        .setUnlockTime(this.latestTimestamp.add(unlockTimestamp));
 
       const unlockTime = await this.ido.unlockTime();
-      expect(unlockTime.eq(this.latestTimestamp.add(5000))).to.equal(true);
+      expect(unlockTime.eq(this.latestTimestamp.add(unlockTimestamp))).to.equal(true);
     });
 
     it("should set deposit min", async function () {
@@ -237,7 +242,7 @@ describe("Money IDO", function () {
     });
 
     it("should not pause after unlock time", async function () {
-      await advanceBlockTo("8000");
+      await advanceTimeAndBlock(80);
       await expect(this.ido.connect(this.owner).pause()).to.be.revertedWith(
         "MoneyIDO: cannot be paused after unlock time"
       );
@@ -296,7 +301,7 @@ describe("Money IDO", function () {
   });
 
   it("should reject deposit after end of sale", async function () {
-    await advanceBlockTo("1000");
+    await  advanceTimeAndBlock(80);
     await expect(this.ido.deposit(expandToUSDT("1500"))).to.be.revertedWith(
       "MoneyIDO: IDO is already finished."
     );
@@ -313,7 +318,7 @@ describe("Money IDO", function () {
       "MoneyIDO: IDO is not unlocked yet."
     );
 
-    await advanceBlockTo("3000");
+    await advanceTimeAndBlock(80);
     await this.ido.connect(this.alice).claim();
 
     expect(await this.money.balanceOf(this.alice.address)).to.equal(
@@ -330,7 +335,7 @@ describe("Money IDO", function () {
       .approve(this.ido.address, expandToUSDT("2000"));
 
     await this.ido.connect(this.alice).deposit(expandToUSDT("2000"));
-    await advanceBlockTo("5000");
+    await advanceTimeAndBlock(80);
 
     await expect(this.ido.connect(this.alice).withdraw()).to.be.revertedWith(
       "MoneyIDO: You can't withdraw funds."
@@ -354,7 +359,7 @@ describe("Money IDO", function () {
       this.ido.connect(this.withdrawer).withdrawRest()
     ).to.be.revertedWith("MoneyIDO: IDO is not unlocked yet.");
 
-    await advanceBlockTo("6500");
+    await advanceTimeAndBlock(80);
 
     await expect(
       this.ido.connect(this.alice).withdrawRest()
